@@ -1,4 +1,4 @@
 # aihudong
 校园版后台管理系统
 
-首页路径：
+首页路径：/aihudong-web/login/toLogin
