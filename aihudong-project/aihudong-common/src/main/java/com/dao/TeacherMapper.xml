@@ -269,7 +269,7 @@
   	select 
   		t.id t_id,t.username,t.password,t.truename,t.sex,t.telephone,t.email,t.job,
   		t.duration,t.times,t.screen_num_sametime,t.nickname,
-  		s.id s_id,s.subject_name,s.desc 
+  		s.id s_id,s.subject_name,s.`desc` 
   	from teacher t,subject s
   	where t.subject_id=s.id
   		and username=#{username} and password=#{password} 

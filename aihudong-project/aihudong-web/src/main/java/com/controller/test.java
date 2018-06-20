@@ -2,20 +2,20 @@ package com.controller;
 
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.model.Admin;
+import com.model.Logger;
 import com.service.AdminService;
 
 @Controller
 @RequestMapping("/login")
 public class test {
-	 private static Logger log=LoggerFactory.getLogger(test.class);
+	
+	protected Logger logger = Logger.getLogger(this.getClass());  
 	
 	@Autowired AdminService adminService;
 	
@@ -45,6 +45,7 @@ public class test {
 		admin = adminService.adminLogin(admin);
 		
 		if(admin!=null){
+			logger.info(admin.getUsername()+"登录系统");
 			session.setAttribute("admin", admin);
 			return "success";
 		}

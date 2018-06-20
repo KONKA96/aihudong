@@ -8,7 +8,7 @@
     <result column="desc" property="desc" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, subject_name, faculty_id, desc
+    id, subject_name, faculty_id, `desc`
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 

@@ -11,8 +11,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -26,6 +24,7 @@ import com.model.Admin;
 import com.model.Building;
 import com.model.Faculty;
 import com.model.License;
+import com.model.Logger;
 import com.model.Subject;
 import com.model.Teacher;
 import com.service.AdminService;
@@ -43,7 +42,7 @@ import net.sf.json.JSONObject;
 @RequestMapping("/admin")
 public class AdminController {
 	
-	private static Logger log=LoggerFactory.getLogger(AdminController.class);
+	protected Logger logger = Logger.getLogger(this.getClass());
 	
 	@Autowired
 	private TeacherService teacherService;
@@ -116,6 +115,14 @@ public class AdminController {
     	
     	PageHelper.startPage(index, pageSize);
     	Page<Admin> adminList = (Page<Admin>) adminService.selectAllAdmin(admin);
+    	
+    	String logInfo=Sjadmin.getUsername()+"搜索管理员信息";
+    	if(Sjadmin.getTruename()!=null) {
+    		logInfo+=",模糊搜索关键字:"+Sjadmin.getTruename();
+    	}
+    	logger.info(logInfo);
+    	
+    	
     	pageUtil.setPageInfo(adminList, index, pageSize,request);
     	
     	/*log.info(adminList.toString());*/
@@ -199,6 +206,7 @@ public class AdminController {
     	List<Admin> adminList = adminService.selectAllAdmin(null);
     	for (Admin ad : adminList) {
 			if(ad.getUsername().equals(admin.getUsername())){
+				logger.info(admin.getUsername()+"用户名已存在，修改失败!");
 				return "exist";
 			}
 		}
@@ -208,10 +216,12 @@ public class AdminController {
     			if(admin.getId().equals(SjAdmin.getId())){
     				session.setAttribute("admin", admin);
     			}
+    			logger.info(SjAdmin.getUsername()+"修改"+admin.getUsername()+"的信息成功!");
     			return "success";
     		}
     	}else{
     		if(adminService.insertSelective(admin)>0){
+    			logger.info(SjAdmin.getUsername()+"添加管理员:"+admin.getUsername());
     			return "success";
     		}
     	}
@@ -224,7 +234,7 @@ public class AdminController {
      */
     @ResponseBody
     @RequestMapping("/deleteAdmin")
-    public String deleteAdmin(Admin admin){
+    public String deleteAdmin(Admin admin,HttpSession session){
 //    	将自己剩余的屏幕数量还给自己上级管理员
     	admin=adminService.selectByPrimaryKey(admin);
     	Admin shangji=new Admin();
@@ -232,8 +242,11 @@ public class AdminController {
     	shangji=adminService.selectByPrimaryKey(shangji);
     	shangji.setScreenRemain(shangji.getScreenRemain()+admin.getScreenRemain());
     	adminService.updateByPrimaryKeySelective(shangji);
+    	
+    	Admin Sjadmin=(Admin) session.getAttribute("admin");
 //    	进行删除
     	if(adminService.deleteByPrimaryKey(admin)>0){
+    		logger.info(Sjadmin.getUsername()+"删除了管理员:"+admin.getId());
     		return "success";
     	}
     	return "error";
@@ -396,6 +409,8 @@ public class AdminController {
      */
     @RequestMapping("/adminLogout")
     public String adminLogout(HttpSession session){
+    	Admin Sjadmin=(Admin) session.getAttribute("admin");
+    	logger.info(Sjadmin.getUsername()+"登出");
     	session.invalidate();
     	return "login";
     }

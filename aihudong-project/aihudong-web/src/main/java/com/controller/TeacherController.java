@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,12 +21,15 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.model.Admin;
 import com.model.Faculty;
+import com.model.Logger;
 import com.model.Student;
 import com.model.Subject;
 import com.model.Teacher;
 import com.service.FacultyService;
 import com.service.StudentService;
+import com.service.SubjectService;
 import com.service.TeacherService;
 import com.util.ImportExcelUtil;
 import com.util.JsonUtils;
@@ -35,10 +39,15 @@ import com.util.ProduceId;
 @Controller
 @RequestMapping("/teacher")
 public class TeacherController {
+	
+	protected Logger logger = Logger.getLogger(this.getClass());
+	
 	@Autowired
 	private TeacherService teacherService;
 	@Autowired
 	private FacultyService facultyService;
+	@Autowired
+	private SubjectService subjectService;
 	@Autowired
 	private StudentService studentService;
 	@Autowired
@@ -60,29 +69,63 @@ public class TeacherController {
 		List<Faculty> facultyList = facultyService.selectAllFaculty(null);
 		modelMap.put("facultyList", facultyList);
 		
+		String logSubject=null;
+		String logfaculty=null;
+		String logUsername=null;
+		
 		PageHelper.startPage(index, pageSize);
 		Page<Teacher> teacherList=null;
+		
+		Map<String,Object> map=new HashMap<>();
+		
+		if(teacher.getUsername()!=null) {
+			
+			logUsername=teacher.getUsername();
+			map.put("username", teacher.getUsername());
+		}
+		
 		if(teacher.getSubjectId()!=null){
 			teacherList = (Page<Teacher>) teacherService.selectAllTeacher(teacher);
-
+			//收集专业日志信息
+			Subject subject = subjectService.selectByPrimaryKey(teacher.getSubjectId());
+			logSubject=subject.getSubjectName();
+			
 		}else{
-			Map<String,Object> map=new HashMap<>();
+			
 			map.put("facultyId", facultyId);
-			if(teacher.getUsername()!=null) {
-				map.put("username", teacher.getUsername());
-			}
+			
 			teacherList = (Page<Teacher>) teacherService.selectTeacherByFaculty(map);
 		}
 		if(facultyId!=null && facultyId!=""){
 //			将系、专业对象设置进教师对象内，使查询条件回显
 			Faculty faculty=new Faculty();
 			faculty.setId(Integer.parseInt(facultyId));
+			
+			//收集院系日志信息
+			faculty=facultyService.selectFacultyById(faculty);
+			logfaculty=faculty.getFacultyName();
+			
 			Subject subject=new Subject();
 			subject.setId(teacher.getSubjectId());
 			subject.setFaculty(faculty);
 			teacher.setSubject(subject);
 		}
 		pageUtil.setPageInfo(teacherList, index, pageSize,request);
+		
+		HttpSession session = request.getSession();
+		Admin admin=(Admin) session.getAttribute("admin");
+		
+		String logInfo=admin.getUsername()+"搜索教师信息";
+		if(logSubject!=null) {
+			logInfo+=",院系:"+logfaculty+",专业:"+logSubject;
+		}else if(logfaculty!=null) {
+			logInfo+=",院系:"+logfaculty;
+		}
+		if(logUsername!=null) {
+			logInfo+=",模糊搜索关键字:"+logUsername;
+		}
+		logger.info(logInfo);
+		
 		modelMap.put("teacherList", teacherList);
 		modelMap.put("teacher", teacher);
 		return "/adminuser/list-user";
@@ -111,22 +154,26 @@ public class TeacherController {
 	 */
 	@ResponseBody
 	@RequestMapping("/updateInfo")
-	public String updateInfo(Teacher teacher){
+	public String updateInfo(Teacher teacher,HttpSession session){
 		List<Teacher> teacherList = teacherService.selectAllTeacher(null);
+		Admin admin=(Admin) session.getAttribute("admin");
 		for (Teacher tea : teacherList) {
 			if(tea.getUsername().equals(teacher.getUsername())&& !tea.getId().equals(teacher.getId())){
+				logger.info(admin.getUsername()+"修改失败，用户名重复");
 				return "same";
 			}
 		}
 		List<Student> studentList = studentService.selectAllStudent(null);
 		for (Student student : studentList) {
 			if(teacher.getUsername().equals(student.getUsername())) {
+				logger.info(admin.getUsername()+"修改失败，用户名重复");
 				return "same";
 			}
 		}
 		if(teacher.getId()!=null && teacher.getId()!=""){
 			
 			if(teacherService.updateTeacherSelected(teacher)>0){
+				logger.info(admin.getUsername()+"修改了"+teacher.getId()+"的信息");
 				return "success";
 			}
 		}else{
@@ -142,6 +189,7 @@ public class TeacherController {
 				teacher.setId(newId);
 			}
 			if(teacherService.insertTeacherSelected(teacher)>0){
+				logger.info(admin.getUsername()+"添加了教师:"+teacher.getUsername());
 				return "success";
 			}
 		}
@@ -155,8 +203,10 @@ public class TeacherController {
 	 */
 	@ResponseBody
 	@RequestMapping("/deleteTeacher")
-	public String deleteTeacher(Teacher teacher){
+	public String deleteTeacher(Teacher teacher,HttpSession session){
+		Admin admin=(Admin) session.getAttribute("admin");
 		if(teacherService.deleteTeacherById(teacher)>0){
+			logger.info(admin.getUsername()+"删除了教师:"+teacher.getId());
 			return "success";
 		}
 		return "error";
@@ -221,7 +271,7 @@ public class TeacherController {
         }else{
         	result+="共"+resultList.size()+"条信息，成功导入"+i+"条信息，导入失败"+(resultList.size()-i)+"条信息";
         }
-        System.out.println(result);
+        logger.info(result);
         return "redirect:showAllTeacher";  
     }
     
