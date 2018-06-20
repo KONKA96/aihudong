@@ -29,6 +29,7 @@ import com.model.Subject;
 import com.model.Teacher;
 import com.service.FacultyService;
 import com.service.StudentService;
+import com.service.SubjectService;
 import com.service.TeacherService;
 import com.util.ImportExcelUtil;
 import com.util.PageUtil;
@@ -46,6 +47,8 @@ public class StudentController {
 	private TeacherService teacherService;
 	@Autowired
 	private FacultyService facultyService;
+	@Autowired
+	private SubjectService subjectService;
 	@Autowired
 	private PageUtil pageUtil;
 	
@@ -65,14 +68,26 @@ public class StudentController {
 		List<Faculty> facultyList = facultyService.selectAllFaculty(null);
 		modelMap.put("facultyList", facultyList);
 		
+		HttpSession session = request.getSession();
+		Admin admin=(Admin) session.getAttribute("admin");
+		
+		//打印日志
+		String logSubject=null;
+		String logfaculty=null;
+		String logUsername=null;
+		
 		PageHelper.startPage(index, pageSize);
 		Page<Student> studentList=null;
 		if(student.getSubjectId()!=null){
+			//收集专业日志信息
+			Subject subject = subjectService.selectByPrimaryKey(student.getSubjectId());
+			logSubject=subject.getSubjectName();
 			studentList = (Page<Student>) studentService.selectAllStudent(student);
 		}else{
 			Map<String,Object> map=new HashMap<>();
 			map.put("facultyId", facultyId);
 			if(student.getUsername()!=null) {
+				logUsername=student.getUsername();
 				map.put("username", student.getUsername());
 			}
 			studentList = (Page<Student>) studentService.selectStudentByFaculty(map);
@@ -80,11 +95,27 @@ public class StudentController {
 		if(facultyId!=null && facultyId!=""){
 			Faculty faculty=new Faculty();
 			faculty.setId(Integer.parseInt(facultyId));
+			
+			//收集院系日志信息
+			faculty=facultyService.selectFacultyById(faculty);
+			logfaculty=faculty.getFacultyName();
+			
 			Subject subject=new Subject();
 			subject.setId(student.getSubjectId());
 			subject.setFaculty(faculty);
 			student.setSubject(subject);
 		}
+		
+		String logInfo=admin.getUsername()+"搜索学生信息";
+		if(logSubject!=null) {
+			logInfo+=",院系:"+logfaculty+",专业:"+logSubject;
+		}else if(logfaculty!=null) {
+			logInfo+=",院系:"+logfaculty;
+		}
+		if(logUsername!=null) {
+			logInfo+=",模糊搜索关键字:"+logUsername;
+		}
+		logger.info(logInfo);
 		 
 		pageUtil.setPageInfo(studentList, index, pageSize,request);
 		modelMap.put("studentList", studentList);
