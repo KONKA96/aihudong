@@ -354,7 +354,7 @@ public class ScreenController {
     				}
     			}
     			if(screenService.updateByPrimaryKeySelective(screen)>0){
-    				logger.info(admin.getUsername()+"修改屏幕:"+screen.getUsername());
+    				logger.info(admin.getUsername()+"修改屏幕:"+screen.getId());
     				i++;
     			}
     		}else{
@@ -410,7 +410,7 @@ public class ScreenController {
 				}
 			}
     		if(screenService.updateByPrimaryKeySelective(screen)>0){
-    			logger.info(admin.getUsername()+"修改屏幕:"+screen.getUsername());
+    			logger.info(admin.getUsername()+"修改屏幕:"+screen.getId());
     			return "success";
     		}
     	}else{
