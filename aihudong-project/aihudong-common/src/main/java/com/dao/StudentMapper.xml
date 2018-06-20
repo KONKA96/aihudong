@@ -240,8 +240,8 @@
   		<if test="username!='' and username!=null">
   			and concat (stu.username,stu.truename,s.subject_name,f.faculty_name) like concat ('%',#{username},'%')  	
   		</if>
-  		<if test="subjectId!=null">
-  			stu.subject_id=#{subjectId}
+  		<if test="subjectId!='' and subjectId!=null">
+  			and stu.subject_id=#{subjectId}
   		</if>
   		
   	</where>
@@ -251,6 +251,9 @@
  <select id="selectStudentByFaculty" parameterType="java.util.Map" resultMap="studentSubjectFacultyMap">
   	<include refid="selectstudent"/>
   	<where>
+  		<if test="subjectId!='' and subjectId!=null">
+  			and s.id=#{subjectId}
+  		</if>
   		<if test="facultyId!='' and facultyId!=null">
   			and f.id=#{facultyId}
   		</if>

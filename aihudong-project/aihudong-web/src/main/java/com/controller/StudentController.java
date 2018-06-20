@@ -77,20 +77,25 @@ public class StudentController {
 		String logUsername=null;
 		
 		PageHelper.startPage(index, pageSize);
-		Page<Student> studentList=null;
-		if(student.getSubjectId()!=null){
-			//收集专业日志信息
-			Subject subject = subjectService.selectByPrimaryKey(student.getSubjectId());
-			logSubject=subject.getSubjectName();
-			studentList = (Page<Student>) studentService.selectAllStudent(student);
-		}else{
-			Map<String,Object> map=new HashMap<>();
+		
+		Map<String,Object> map=new HashMap<>();
+		if(student.getSubjectId()!=null) {
+			map.put("subjectId", student.getSubjectId());
+		}
+		if(facultyId!=null && facultyId!="") {
 			map.put("facultyId", facultyId);
-			if(student.getUsername()!=null) {
-				logUsername=student.getUsername();
-				map.put("username", student.getUsername());
-			}
-			studentList = (Page<Student>) studentService.selectStudentByFaculty(map);
+		}
+		if(student.getUsername()!=null&&student.getUsername()!="") {
+			map.put("username", student.getUsername());
+			logUsername=student.getUsername();
+		}
+		Page<Student> studentList=(Page<Student>) studentService.selectStudentByFaculty(map);
+		
+		Subject subject=new Subject();
+		if(facultyId!=null && facultyId!="") {
+			//收集专业日志信息
+			subject=subjectService.selectByPrimaryKey(student.getSubjectId());
+			logSubject=subject.getSubjectName();
 		}
 		if(facultyId!=null && facultyId!=""){
 			Faculty faculty=new Faculty();
@@ -100,9 +105,10 @@ public class StudentController {
 			faculty=facultyService.selectFacultyById(faculty);
 			logfaculty=faculty.getFacultyName();
 			
-			Subject subject=new Subject();
+			
 			subject.setId(student.getSubjectId());
 			subject.setFaculty(faculty);
+			
 			student.setSubject(subject);
 		}
 		
