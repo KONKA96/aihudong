@@ -13,11 +13,13 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.exception.commonException;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.model.Admin;
@@ -118,20 +120,14 @@ public class AdminController {
     	
     	String logInfo=Sjadmin.getUsername()+"搜索管理员信息";
     	if(Sjadmin.getTruename()!=null) {
-    		logInfo+=",模糊搜索关键字:"+Sjadmin.getTruename();
+    		logInfo+=",模糊搜索关键字:"+admin.getTruename();
     	}
     	logger.info(logInfo);
     	
     	
     	pageUtil.setPageInfo(adminList, index, pageSize,request);
     	
-    	/*log.info(adminList.toString());*/
     	modelMap.put("adminList", adminList);
-    	/*try {
-            int i = 1 / 0;
-        } catch (Exception e) {
-            log.error("故意除零了", e);
-        }*/
     	return "/adminuser/list-admin";
     }
     
@@ -190,6 +186,7 @@ public class AdminController {
      * @param admin
      * @return
      */
+    @Transactional
     @ResponseBody
     @RequestMapping("/updateAdmin")
     public String updateAdmin(Admin admin,HttpSession session){
@@ -205,26 +202,35 @@ public class AdminController {
 		}
     	List<Admin> adminList = adminService.selectAllAdmin(null);
     	for (Admin ad : adminList) {
-			if(ad.getUsername().equals(admin.getUsername())){
+			if(ad.getUsername().equals(admin.getUsername()) && !ad.getId().equals(admin.getId())){
 				logger.info(admin.getUsername()+"用户名已存在，修改失败!");
 				return "exist";
 			}
 		}
-//    	进行修改和添加
-    	if(admin.getId()!=null){
-    		if(adminService.updateByPrimaryKeySelective(admin)>0){
-    			if(admin.getId().equals(SjAdmin.getId())){
-    				session.setAttribute("admin", admin);
-    			}
-    			logger.info(SjAdmin.getUsername()+"修改"+admin.getUsername()+"的信息成功!");
-    			return "success";
-    		}
-    	}else{
-    		if(adminService.insertSelective(admin)>0){
-    			logger.info(SjAdmin.getUsername()+"添加管理员:"+admin.getUsername());
-    			return "success";
-    		}
-    	}
+    	try {
+			//进行修改和添加
+			if(admin.getId()!=null){
+				if(adminService.updateByPrimaryKeySelective(admin)>0){
+					if(admin.getId().equals(SjAdmin.getId())){
+						session.setAttribute("admin", admin);
+					}
+					logger.info(SjAdmin.getUsername()+"修改"+admin.getUsername()+"的信息成功!");
+					return "success";
+				}else {
+					throw new commonException("修改管理员失败");
+				}
+			}else{
+				if(adminService.insertSelective(admin)>0){
+					logger.info(SjAdmin.getUsername()+"添加管理员:"+admin.getUsername());
+					return "success";
+				}else {
+					throw new commonException("添加管理员失败");
+				}
+			}
+		} catch (commonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	return "error";
     }
     /**
