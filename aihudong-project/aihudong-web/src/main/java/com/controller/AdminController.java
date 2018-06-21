@@ -296,6 +296,8 @@ public class AdminController {
     @RequestMapping("/updateScreenNum")
     public String updateScreenNum(Admin admin,HttpSession session){
 //    	admin = adminService.selectByPrimaryKey(admin);
+    	Admin Sjadmin=(Admin) session.getAttribute("admin");
+    	
     	Map<String,Object> map=new HashMap<>();
     	int changeNum=0;
 //    	判断要操作的对象是几级管理员
@@ -317,10 +319,12 @@ public class AdminController {
         	int already=erjiAdminOld.getScreenNum()-erjiAdminOld.getScreenRemain();
 //        	如果屏幕数量加上新修改的屏幕数量大于上一级的屏幕数量，则修改失败
         	if(YijiAdmin.getScreenRemain()-changeNum<0){
+        		logger.info(Sjadmin.getUsername()+"进行屏幕数量分配操作,"+YijiAdmin.getUsername()+"数量不足,分配失败!");
         		return "error";
         	}
 //        	如果分配的屏幕小于已经分配的屏幕数量，同样失败
         	if(admin.getScreenNum()<already){
+        		logger.info(Sjadmin.getUsername()+"进行屏幕数量分配操作,"+admin.getId()+"数量不足,分配失败!");
         		return "error2";
         	}
         	YijiAdmin.setScreenRemain(YijiAdmin.getScreenRemain()-changeNum);
@@ -329,10 +333,12 @@ public class AdminController {
         	erjiAdminOld.setScreenRemain(erjiAdminOld.getScreenRemain()+changeNum);
         	if(admin.getId()!=null){
         		if(adminService.updateByPrimaryKeySelective(erjiAdminOld)>0){
+        			logger.info(Sjadmin.getUsername()+"进行屏幕数量分配操作,"+erjiAdminOld.getUsername()+"的剩余屏幕数为:"+erjiAdminOld.getScreenRemain());
             		return "success";
             	}
         	}else{
         		if(adminService.insertSelective(erjiAdminOld)>0){
+        			logger.info(Sjadmin.getUsername()+"添加操作管理员:"+erjiAdminOld.getUsername());
             		return "success";
             	}
         	}
@@ -346,6 +352,7 @@ public class AdminController {
     		
     		changeNum=admin.getScreenNum()-yijiAdminOld.getScreenNum();
     		if(genjiAdmin.getScreenRemain()<changeNum){
+    			logger.info(Sjadmin.getUsername()+"进行屏幕数量分配操作,"+genjiAdmin.getUsername()+"数量不足,分配失败!");
     			return "error";
     		}
     		genjiAdmin.setScreenRemain(genjiAdmin.getScreenRemain()-changeNum);
@@ -355,6 +362,7 @@ public class AdminController {
     		yijiAdminOld.setScreenNum(admin.getScreenNum());
     		yijiAdminOld.setScreenRemain(yijiAdminOld.getScreenRemain()+changeNum);
     		if(adminService.updateByPrimaryKeySelective(yijiAdminOld)>0){
+    			logger.info(Sjadmin.getUsername()+"进行屏幕数量分配操作,"+yijiAdminOld.getUsername()+"的剩余屏幕数为:"+yijiAdminOld.getScreenRemain());
     			return "success";
     		}
     	}
@@ -364,10 +372,12 @@ public class AdminController {
     @ResponseBody
     @RequestMapping("/insertAdminScreen")
     public String insertAdminScreen(Admin admin,HttpSession session){
+    	Admin genjiAdmin=(Admin) session.getAttribute("admin");
     	
     	List<Admin> adminList = adminService.selectAllAdmin(null);
     	for (Admin ad : adminList) {
 			if(ad.getUsername().equals(admin.getUsername())){
+				logger.info(genjiAdmin.getUsername()+"正在添加管理员,"+admin.getUsername()+"用户名已经存在!");
 				return "exist";
 			}
 		}
@@ -378,17 +388,20 @@ public class AdminController {
     		List<Admin> yijiAdminList=adminService.selectYijiAdmin(map);
         	Admin YijiAdmin = yijiAdminList.get(0);
         	if(YijiAdmin.getScreenRemain()<=admin.getScreenNum()){
+        		logger.info(genjiAdmin.getUsername()+"正在添加管理员,屏幕剩余数量不足!");
         		return "error";
         	}
         	YijiAdmin.setScreenRemain(YijiAdmin.getScreenRemain()-admin.getScreenNum());
         	adminService.updateByPrimaryKeySelective(YijiAdmin);
         	admin.setScreenRemain(admin.getScreenNum());
         	if(adminService.insertSelective(admin)>0){
+        		logger.info(genjiAdmin.getUsername()+"添加管理员:"+admin.getUsername());
         		return "success";
         	}
     	}else if(admin.getPower()==1){
-    		Admin genjiAdmin=(Admin) session.getAttribute("admin");
+    		
     		if(genjiAdmin.getScreenRemain()<=admin.getScreenNum()){
+    			logger.info(genjiAdmin.getUsername()+"正在添加管理员,屏幕剩余数量不足!");
     			return "error";
     		}
     		genjiAdmin.setScreenRemain(genjiAdmin.getScreenRemain()-admin.getScreenNum());
@@ -396,6 +409,7 @@ public class AdminController {
     		session.setAttribute("admin", genjiAdmin);
     		admin.setScreenRemain(admin.getScreenNum());
     		if(adminService.insertSelective(admin)>0){
+    			logger.info(genjiAdmin.getUsername()+"添加管理员:"+admin.getUsername());
         		return "success";
         	}
     	}
