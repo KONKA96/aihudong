@@ -69,19 +69,25 @@
 				                   	<span class="nav-label">屏幕管理</span>
 				                   </a>
 			                </li>
-			               <li>
+			                <li>
 				               <a class="J_menuItem" href="/aihudong-web/admin/showAllAdmin">
 				                   	<i class="fa fa-columns"></i> 
 				                   	<span class="nav-label">管理员管理</span>
 				                   </a>
 			                </li>
-			                 <li>
+			                <li>
 				               <a class="J_menuItem" href="/aihudong-web/screen/screenDistribute">
 				                   	<i class="fa fa-columns"></i> 
 				                   	<span class="nav-label">屏幕分配</span>
 				                   </a>
 			                </li>
-			                 <li>
+			                <li>
+				               <a class="J_menuItem" href="/aihudong-web/message/showAllMessage">
+				                   	<i class="fa fa-columns"></i> 
+				                   	<span class="nav-label">消息推送</span>
+				                   </a>
+			                </li>
+			                <li>
 				               <a class="J_menuItem" href="/aihudong-web/admin/showLicense">
 				                   	<i class="fa fa-columns"></i> 
 				                   	<span class="nav-label">license管理</span>

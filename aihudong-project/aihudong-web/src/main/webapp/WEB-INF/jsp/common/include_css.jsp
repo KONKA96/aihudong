@@ -18,7 +18,8 @@
 <link href="<%=basePath %>resources/css/plugins/sweetalert/sweetalert.css" rel="stylesheet">
 <link href="<%=basePath %>resources/css/login.css" rel="stylesheet">
 <link href="<%=basePath %>resources/css/plugins/iCheck/custom.css" rel="stylesheet">
-<link href="<%=basePath %>resources/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<link href="<%=basePath %>resources/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <!--[if lt IE 9]>
+
 <meta http-equiv="refresh" content="0;ie.html" />
 <![endif]-->
