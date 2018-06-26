@@ -30,6 +30,6 @@
 <!-- Sweet alert -->
 <script src="<%=basePath%>resources/js/plugins/sweetalert/sweetalert.min.js"></script>
 <script src="<%=basePath%>resources/js/plugins/iCheck/icheck.min.js"></script>
-<script src="<%=basePath%>resources/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<script src="<%=basePath%>resources/js/bootstrap-datetimepicker.js?v=1.0.1"></script>
 <!-- 引入图表 -->
 <script src="<%=basePath%>resources/js/echarts.min.js"></script>
