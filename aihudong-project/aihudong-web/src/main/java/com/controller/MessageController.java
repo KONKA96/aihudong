@@ -1,8 +1,14 @@
 package com.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -17,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.model.Admin;
 import com.model.Logger;
 import com.model.Message;
 import com.model.Zone;
@@ -56,6 +63,15 @@ public class MessageController {
 		Map<String,Object> map=new HashMap<>();
 		
 		Page<Message> messageList = (Page<Message>) messageService.selectAllMessage(map);
+		for (Message mess : messageList) {
+			if(mess.getStartTime().getTime()>new Date().getTime()) {
+				mess.setMessageState(0);
+			}else if(mess.getStartTime().getTime()<new Date().getTime() && mess.getEndTime().getTime()>new Date().getTime()) {
+				mess.setMessageState(1);
+			}else if(mess.getEndTime().getTime()<new Date().getTime()) {
+				mess.setMessageState(2);
+			}
+		}
 		pageUtil.setPageInfo(messageList, index, pageSize,request);
 		
 		modelMap.put("messageList", messageList);
@@ -73,6 +89,7 @@ public class MessageController {
 	public String toUpdateMessage(Message message,ModelMap modelMap) {
 		Map<String,Object> map=new HashMap<>();
 		if(message.getId()!=null) {
+			map.put("id", message.getId());
 			List<Message> messageList = messageService.selectAllMessage(map);
 			modelMap.put("message", messageList.get(0));
 		}
@@ -82,11 +99,76 @@ public class MessageController {
 		return "/message/edit-message";
 	}
 	
+	/**
+	 * 新增、修改消息
+	 * @param message 消息实体类
+	 * @param startTimeString 开始时间
+ 	 * @param endTimeString 结束时间
+	 * @param request
+	 * @return
+	 * @throws ParseException
+	 */
 	@RequestMapping("/updateMessage")
-	public String updateMessage(@RequestParam(value="file") MultipartFile file,Message message) {
-		System.out.println(file.getName());
-		System.out.println(message);
-		return "";
+	public String updateMessage(Message message,@RequestParam String startTimeString,
+			@RequestParam String endTimeString,HttpServletRequest request,HttpSession session) throws ParseException {
+		SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		//设置推送的开始和结束时间
+		message.setStartTime(sdf.parse(startTimeString));
+		message.setEndTime(sdf.parse(endTimeString));
+		
+		//设置校区id字符串，中间用逗号隔开
+		message.setZoneId(message.getZoneList().get(0).getZoneName());
+		//设置教学楼id字符串，中间用逗号隔开
+		message.setBuildingId(message.getBuildingList().get(0).getBuildingName());
+		//设置房间id字符串，中间用逗号隔开
+		message.setRoomId(message.getRoomList().get(0).getId());
+		
+		//设置推送图片名称字符串，中间用逗号隔开
+		String picString="";
+		List<MultipartFile> fileList = message.getFileList();
+		if(fileList.size()!=0) {
+			for (MultipartFile file : fileList) {
+				String fileName = file.getOriginalFilename();
+				String realPath = request.getServletContext().getRealPath("/upload");
+				String newFileName=UUID.randomUUID()+fileName.substring(fileName.lastIndexOf("."));
+				String filePath = realPath+File.separator+newFileName;
+				File uploadFile =new File(filePath);
+				try {
+					file.transferTo(uploadFile);
+				} catch (IllegalStateException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(fileList.get(0).getOriginalFilename().equals(file.getOriginalFilename())) {
+					picString+=newFileName;
+				}else {
+					picString+=","+newFileName;
+				}
+			}
+		}
+		
+		message.setMessagePic(picString);
+		
+		message.setAdminId(((Admin)session.getAttribute("admin")).getId().toString());
+		try {
+			if(message.getId()!=null) {
+				if(messageService.updateByPrimaryKeySelective(message)>0) {
+					return "/success/200";
+				}
+			}else {
+				if(messageService.insertSelective(message)>0) {
+					return "/success/200";
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "/error/404";
+		}
+		return "/error/404";
 	}
 	
 	/**

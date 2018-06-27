@@ -48,7 +48,7 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">上传文件</label>
                                 <div class="col-sm-10">
-                                    <input type="file" class="form-control" name="file">
+									<input type="file" name="fileList" multiple="multiple" max="10" class="inputPic" accept="image/*">  
                                 </div>
                             </div>
                             
@@ -57,8 +57,8 @@
                                 <div class="col-sm-5">
                                     <div class="form-group">
 						                <label for="dtp_input1" class="col-md-2 control-label">start time</label>
-						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
-						                    <input class="form-control" name="startTime" size="16" type="text" value="" readonly>
+						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="yyyy-mm-dd hh:ii:ss" data-link-field="dtp_input1">
+						                    <input class="form-control" name="startTimeString" size="16" type="text" value="${message.startTime }" readonly>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
 						                </div>
@@ -68,8 +68,8 @@
                                 <div class="col-sm-5">
                                     <div class="form-group">
 						                <label for="dtp_input1" class="col-md-2 control-label">end time</label>
-						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
-						                    <input class="form-control" name="endTime" size="16" type="text" value="" readonly>
+						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="yyyy-mm-dd hh:ii:ss" data-link-field="dtp_input1">
+						                    <input class="form-control" name="endTimeString" size="16" type="text" value="${message.endTime }" readonly>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
 						                </div>
@@ -81,17 +81,17 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">接收终端</label>
                                 <div class="col-sm-10">
-                                	<c:forEach items="${zoneList }" var="zone" >
+                                	<c:forEach items="${zoneList }" var="zone">
                                 		<div class="col-sm-5" style="border:1px solid blue;">
-                                		<input type="checkbox" value="${zone.id }" name="zoneId" onclick="checkZone(${zone.id},this)"
+                                		<input type="checkbox" value="${zone.id }" name="zoneList[0].zoneName" onclick="checkZone(${zone.id},this)"
                                 		<c:if test="${fn:contains(message.zoneId,zone.id)}"> checked="checked" </c:if>>${zone.zoneName } 
                                 		<c:forEach items="${zone.buildingList }" var="building">
                                 			<div style="background:yellow; border-bottom:1px solid black;">
-	                                		<input type="checkbox" value="${building.id }" name="buildingId" class="zone${zone.id }" onclick="checkBuilding(${building.id},this)"
+	                                		<input type="checkbox" value="${building.id }" name="buildingList[0].buildingName" class="zone${zone.id }" onclick="checkBuilding(${building.id},this)"
 	                                		<c:if test="${fn:contains(message.buildingId,building.id)}"> checked="checked" </c:if>> ${building.buildingName } 
                                 			<br/>
                                 			<c:forEach items="${building.roomList }" var="room">
-                                				<input type="checkbox" value="${room.id }" name="roomId" class="zone${zone.id } building${building.id}"
+                                				<input type="checkbox" value="${room.id }" name="roomList[0].id" class="zone${zone.id } building${building.id}"
 	                                			<c:if test="${fn:contains(message.roomId,room.id)}"> checked="checked" </c:if>> ${room.num } 
                                 			</c:forEach>
                                 			</div>

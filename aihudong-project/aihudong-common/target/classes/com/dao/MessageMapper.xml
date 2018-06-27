@@ -189,5 +189,10 @@
     	a.id a_id, a.username, a.truename
     from message m
     left join admin a on m.admin_id=a.id
+    <where>
+    	<if test="id!=null">
+    		and m.id=#{id}
+    	</if>
+    </where>
   </select>
 </mapper>
