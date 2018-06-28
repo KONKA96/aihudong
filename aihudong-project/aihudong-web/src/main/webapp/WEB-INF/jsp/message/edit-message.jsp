@@ -83,15 +83,15 @@
                                 <div class="col-sm-10">
                                 	<c:forEach items="${zoneList }" var="zone">
                                 		<div class="col-sm-5" style="border:1px solid blue;">
-                                		<input type="checkbox" value="${zone.id }" name="zoneList[0].zoneName" onclick="checkZone(${zone.id},this)"
+                                		<input type="checkbox" id="zone${zone.id }" value="${zone.id }" name="zoneList[0].zoneName" onclick="checkZone(${zone.id},this)"
                                 		<c:if test="${fn:contains(message.zoneId,zone.id)}"> checked="checked" </c:if>>${zone.zoneName } 
                                 		<c:forEach items="${zone.buildingList }" var="building">
                                 			<div style="background:yellow; border-bottom:1px solid black;">
-	                                		<input type="checkbox" value="${building.id }" name="buildingList[0].buildingName" class="zone${zone.id }" onclick="checkBuilding(${building.id},this)"
+	                                		<input type="checkbox" id="building${building.id }" value="${building.id }" name="buildingList[0].buildingName" class="zone${zone.id }" onclick="checkBuilding(${building.id},this,${zone.id})"
 	                                		<c:if test="${fn:contains(message.buildingId,building.id)}"> checked="checked" </c:if>> ${building.buildingName } 
                                 			<br/>
                                 			<c:forEach items="${building.roomList }" var="room">
-                                				<input type="checkbox" value="${room.id }" name="roomList[0].id" class="zone${zone.id } building${building.id}"
+                                				<input type="checkbox" value="${room.id }" name="roomList[0].id" class="zone${zone.id } building${building.id}" onclick="checkRoom(${building.id},this,${zone.id})"
 	                                			<c:if test="${fn:contains(message.roomId,room.id)}"> checked="checked" </c:if>> ${room.num } 
                                 			</c:forEach>
                                 			</div>
@@ -193,19 +193,81 @@
 		
 	}
 	
-	function checkBuilding(id,obj){
+	function checkBuilding(id,obj,zId){
+		//下级全选和清空
 		var buildingId="building"+id;
 		var ele=document.getElementsByClassName(buildingId);
+		
+		//校区的选中和清空
+		var zoneId="zone"+zId;
+		var childNodes=document.getElementsByClassName(zoneId);
+		
+		var zone=document.getElementById(zoneId);
 		if(obj.checked==true){
 			for (var i = 0; i < ele.length; i++) {
 				ele[i].checked=true;
 			}
+			zone.checked=true;
+			
 		}else{
 			for (var i = 0; i < ele.length; i++) {
 				ele[i].checked=false;
 			}
+			var count=0;
+			for (var i = 0; i < childNodes.length; i++) {
+				if(childNodes[i].checked==true){
+					break;
+				}else{
+					count++;
+				}
+			}
+			if(count==childNodes.length){
+				zone.checked=false;
+			}
 		}
 		
+	}
+	
+	function checkRoom(bid,obj,zId){
+		//下级全选和清空
+		var buildingId="building"+bid;
+		var ele=document.getElementsByClassName(buildingId);
+		
+		//校区的选中和清空
+		var zoneId="zone"+zId;
+		var childNodes=document.getElementsByClassName(zoneId);
+		
+		var zone=document.getElementById(zoneId);
+		var building=document.getElementById(buildingId);
+		
+		if(obj.checked==true){
+			zone.checked=true;
+			building.checked=true;
+		}else{
+			counti=0;
+			for (var i = 0; i < ele.length; i++) {
+				if(ele[i].checked==true){
+					break;
+				}else{
+					counti++;
+				}
+			}
+			if(counti==ele.length){
+				building.checked=false;
+			}
+			
+			countj=0;
+			for (var i = 0; i < childNodes.length; i++) {
+				if(childNodes[i].checked==true){
+					break;
+				}else{
+					countj++;
+				}
+			}
+			if(countj==childNodes.length){
+				zone.checked=false;
+			}
+		}
 	}
 	
 	//日历插件

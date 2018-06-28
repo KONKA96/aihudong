@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +27,12 @@ import com.github.pagehelper.PageHelper;
 import com.model.Admin;
 import com.model.Logger;
 import com.model.Message;
+import com.model.Room;
 import com.model.Zone;
 import com.service.MessageService;
+import com.service.RoomService;
 import com.service.ZoneService;
+import com.util.JsonUtils;
 import com.util.PageUtil;
 
 @Controller
@@ -41,6 +45,8 @@ public class MessageController {
 	private MessageService messageService;
 	@Autowired
 	private ZoneService zoneService;
+	@Autowired
+	private RoomService roomService;
 	@Autowired
 	private PageUtil pageUtil;
 	
@@ -75,6 +81,9 @@ public class MessageController {
 		pageUtil.setPageInfo(messageList, index, pageSize,request);
 		
 		modelMap.put("messageList", messageList);
+		
+		List<Zone> zoneList = zoneService.selectAllZone(null);
+		modelMap.put("zoneList", zoneList);
 		
 		return "/message/list-message";
 	}
@@ -148,19 +157,19 @@ public class MessageController {
 					picString+=","+newFileName;
 				}
 			}
+			message.setMessagePic(picString);
 		}
 		
-		message.setMessagePic(picString);
-		
+		//设置推送消息的管理员id
 		message.setAdminId(((Admin)session.getAttribute("admin")).getId().toString());
 		try {
 			if(message.getId()!=null) {
 				if(messageService.updateByPrimaryKeySelective(message)>0) {
-					return "/success/200";
+					return "redirect:/message/showAllMessage";
 				}
 			}else {
 				if(messageService.insertSelective(message)>0) {
-					return "/success/200";
+					return "redirect:/message/showAllMessage";
 				}
 			}
 		} catch (Exception e) {
@@ -186,4 +195,49 @@ public class MessageController {
 		return "";
 	}
 	
+	/**
+	 * 查询消息的接收终端
+	 * @param message
+	 * @param modelMap
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value="/showContent",produces = "text/json;charset=UTF-8")
+	public String showContent(Message message) {
+		message=messageService.selectByPrimaryKey(message);
+		String[] roomIdList = message.getRoomId().split(",");
+		List<Room> roomList=new ArrayList<>();
+		for (String roomId : roomIdList) {
+			Map<String,Object> map=new HashMap<>();
+			map.put("roomId", roomId);
+			roomList.add(roomService.selectRoomBuildZone(map));
+		}
+		
+		return JsonUtils.objectToJson(roomList);
+	}
+	
+	/**
+	 * 查询消息的图片
+	 * @param message
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/showPic")
+	public String showPic(Message message,HttpServletRequest request) {
+		message=messageService.selectByPrimaryKey(message);
+		String[] picStringList = message.getMessagePic().split(",");
+		
+		List<String> picList=new ArrayList<>();
+		for (String picString : picStringList) {
+			picString=request.getScheme() + "://"
+					+ request.getServerName() + ":"
+					+ request.getServerPort()
+					+ "/aihudong-web/upload/"
+					+picString;
+			
+			picList.add(picString);
+		}
+		
+		return JsonUtils.objectToJson(picList);
+	}
 }

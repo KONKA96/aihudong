@@ -101,10 +101,10 @@
         #{adminId,jdbcType=VARCHAR},
       </if>
       <if test="startTime != null" >
-        #{startTime,jdbcType=DATE},
+        #{startTime,jdbcType=TIMESTAMP},
       </if>
       <if test="endTime != null" >
-        #{endTime,jdbcType=DATE},
+        #{endTime,jdbcType=TIMESTAMP},
       </if>
       <if test="messageState != null" >
         #{messageState,jdbcType=INTEGER},
