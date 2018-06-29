@@ -2,6 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 
@@ -58,7 +59,7 @@
                                     <div class="form-group">
 						                <label for="dtp_input1" class="col-md-2 control-label">start time</label>
 						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="yyyy-mm-dd hh:ii:ss" data-link-field="dtp_input1">
-						                    <input class="form-control" name="startTimeString" size="16" type="text" value="${message.startTime }" readonly>
+						                    <input class="form-control" name="startTimeString" size="16" type="text" value="<fmt:formatDate value='${message.startTime }' pattern='yyyy-MM-dd HH:mm:ss'/>" readonly>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
 						                </div>
@@ -69,7 +70,7 @@
                                     <div class="form-group">
 						                <label for="dtp_input1" class="col-md-2 control-label">end time</label>
 						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="yyyy-mm-dd hh:ii:ss" data-link-field="dtp_input1">
-						                    <input class="form-control" name="endTimeString" size="16" type="text" value="${message.endTime }" readonly>
+						                    <input class="form-control" name="endTimeString" size="16" type="text" value="<fmt:formatDate value='${message.endTime }' pattern='yyyy-MM-dd HH:mm:ss'/>" readonly>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
 						                </div>
@@ -118,24 +119,6 @@
 
 </body>
 <script type="text/javascript">
-	/* function selectAdmin(obj){
-		if(obj.value==1||obj.value==''){
-			$("#yijiSelect").empty();
-			$("#yijiadmin").css("display","none");
-		}else if(obj.value==2){
-			$("#yijiadmin").css("display","block");
-			$.ajax({
-				url:"/aihudong-web/admin/selectAllYiJiAdmin",
-				type:"post",
-				success:function(data){
-					$("#yijiSelect").append("<option value=''>---请选择---</option>");
-					for (var i = 0; i < data.length; i++) {
-						$("#yijiSelect").append("<option value='"+data[i].id+"'>"+data[i].truename+"</option>");
-					}
-				}
-			})
-		}
-	} */
 
 	$(document).ready(function () {
 	    $('.i-checks').iCheck({
@@ -144,34 +127,6 @@
 	    });
 	});
 	
-	function updateInfo(){
-		if($("#username")[0].value==""){
-			alert("用户名必填");
-			return false;
-		}else if($("#password")[0].value==""){
-			alert("密码必填");
-			return false;
-		}else if($("#truename")[0].value==""){
-			alert("姓名必填");
-			return false;
-		}
-		
-		$.ajax({
-			url:"/aihudong-web/admin/updateAdmin",
-			data:$("#editForm").serialize(),
-			type:"post",
-			success:function(data){
-				if(data=='success'){
-					alert("操作成功！");
-					window.location="/aihudong-web/admin/showAllAdmin";
-				}else if(data=='exist'){
-					alert("用户名不能重复！");
-				}else{
-					alert("操作失败");
-				}
-			}
-		})
-	}
 	
 	function goback(){
 		window.history.back();

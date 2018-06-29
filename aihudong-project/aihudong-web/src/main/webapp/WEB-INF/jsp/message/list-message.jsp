@@ -32,7 +32,7 @@
 						<div class="dataTables_wrapper form-inline" role="grid">
 							<!-- 查询条件 -->
 							<form method="post" id="searchForm"
-								action="/aihudong-web/admin/showAllAdmin">
+								action="/aihudong-web/message/showAllMessage">
 								<div class="row">
 									<div class="col-sm-2">
 										<div class="dataTables_length">
@@ -52,7 +52,7 @@
 		                    			</c:if> --%>
 										<div class="input-group" style="float: right;">
 											<!-- 真实姓名 -->
-											<input type="text" name="truename" value="${admin.truename }"
+											<input type="text" name="messageName" value="${message.messageName }"
 												class="form-control" placeholder="关键字查找">
 											<div class="input-group-btn">
 												<input type="submit" class="btn btn-primary" value="搜索">
@@ -112,7 +112,7 @@
 							</table>
 							<!-- 分页 -->
 							<jsp:include page="../common/include_page.jsp">
-								<jsp:param value="/aihudong-web/admin/showAllAdmin"
+								<jsp:param value="/aihudong-web/admin/showAllMessage"
 									name="pageTitle" />
 							</jsp:include>
 							<!-- 分页结束 -->
@@ -233,98 +233,6 @@ function showPic(id){
 			})
 		}
 		
-	}
-	
-	function checkZone(id,obj){
-		var zoneId="zone"+id;
-		var ele=document.getElementsByClassName(zoneId);
-		if(obj.checked==true){
-			for (var i = 0; i < ele.length; i++) {
-				ele[i].checked=true;
-			}
-		}else{
-			for (var i = 0; i < ele.length; i++) {
-				ele[i].checked=false;
-			}
-		}
-		
-	}
-	
-	function checkBuilding(id,obj,zId){
-		//下级全选和清空
-		var buildingId="building"+id;
-		var ele=document.getElementsByClassName(buildingId);
-		
-		//校区的选中和清空
-		var zoneId="zone"+zId;
-		var childNodes=document.getElementsByClassName(zoneId);
-		
-		var zone=document.getElementById(zoneId);
-		if(obj.checked==true){
-			for (var i = 0; i < ele.length; i++) {
-				ele[i].checked=true;
-			}
-			zone.checked=true;
-			
-		}else{
-			for (var i = 0; i < ele.length; i++) {
-				ele[i].checked=false;
-			}
-			var count=0;
-			for (var i = 0; i < childNodes.length; i++) {
-				if(childNodes[i].checked==true){
-					break;
-				}else{
-					count++;
-				}
-			}
-			if(count==childNodes.length){
-				zone.checked=false;
-			}
-		}
-		
-	}
-	
-	function checkRoom(bid,obj,zId){
-		//下级全选和清空
-		var buildingId="building"+bid;
-		var ele=document.getElementsByClassName(buildingId);
-		
-		//校区的选中和清空
-		var zoneId="zone"+zId;
-		var childNodes=document.getElementsByClassName(zoneId);
-		
-		var zone=document.getElementById(zoneId);
-		var building=document.getElementById(buildingId);
-		
-		if(obj.checked==true){
-			zone.checked=true;
-			building.checked=true;
-		}else{
-			counti=0;
-			for (var i = 0; i < ele.length; i++) {
-				if(ele[i].checked==true){
-					break;
-				}else{
-					counti++;
-				}
-			}
-			if(counti==ele.length){
-				building.checked=false;
-			}
-			
-			countj=0;
-			for (var i = 0; i < childNodes.length; i++) {
-				if(childNodes[i].checked==true){
-					break;
-				}else{
-					countj++;
-				}
-			}
-			if(countj==childNodes.length){
-				zone.checked=false;
-			}
-		}
 	}
 </script>
 </html>

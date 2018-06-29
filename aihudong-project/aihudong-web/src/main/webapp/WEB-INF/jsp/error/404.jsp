@@ -17,27 +17,27 @@
     <div class="middle-box text-center animated fadeInDown">
         <h1>404</h1>
         <h3 class="font-bold">您的操作好像不对吧</h3>
-
-        <!-- <div class="error-desc">
-           <span id="count">5</span>秒之后返回首页
-        </div> -->
+		<h3 class="font-bold">${error }</h3>
+        <div class="error-desc">
+           <span id="count">5</span>秒之后返回上一页面
+        </div>
     </div>
 
    <jsp:include page="../common/include_js.jsp" />
 
 </body>
-<!-- <script language="javascript" type="text/javascript">
+<script language="javascript" type="text/javascript">
 var i = 5;
 var intervalid;
 intervalid = setInterval("fun()", 1000);
 function fun() {
 if (i == 0) {
-	window.location.reload();
+	window.history.back();
 clearInterval(intervalid);
 }
 document.getElementById("count").innerHTML = i;
 i--;
 }
-</script> -->
+</script>
 </html>
     

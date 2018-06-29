@@ -68,6 +68,10 @@ public class MessageController {
 		
 		Map<String,Object> map=new HashMap<>();
 		
+		if(message.getMessageName()!=null) {
+			map.put("messageName", message.getMessageName());
+		}
+		
 		Page<Message> messageList = (Page<Message>) messageService.selectAllMessage(map);
 		for (Message mess : messageList) {
 			if(mess.getStartTime().getTime()>new Date().getTime()) {
@@ -118,10 +122,15 @@ public class MessageController {
 	 * @throws ParseException
 	 */
 	@RequestMapping("/updateMessage")
-	public String updateMessage(Message message,@RequestParam String startTimeString,
-			@RequestParam String endTimeString,HttpServletRequest request,HttpSession session) throws ParseException {
+	public String updateMessage(Message message,@RequestParam(required=false) String startTimeString,
+			@RequestParam(required=false) String endTimeString,HttpServletRequest request,HttpSession session,
+			ModelMap modelMap) throws ParseException {
 		SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		//设置推送的开始和结束时间
+		if(startTimeString==null||endTimeString!=null) {
+			modelMap.put("error", "推送时间不能为空!");
+			return "/error/404";
+		}
 		message.setStartTime(sdf.parse(startTimeString));
 		message.setEndTime(sdf.parse(endTimeString));
 		
@@ -135,7 +144,7 @@ public class MessageController {
 		//设置推送图片名称字符串，中间用逗号隔开
 		String picString="";
 		List<MultipartFile> fileList = message.getFileList();
-		if(fileList.size()!=0) {
+		if(fileList.get(0).getSize()!=0) {
 			for (MultipartFile file : fileList) {
 				String fileName = file.getOriginalFilename();
 				String realPath = request.getServletContext().getRealPath("/upload");
