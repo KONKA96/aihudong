@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.model.Admin;
+import com.model.Building;
 import com.model.Logger;
 import com.model.Message;
 import com.model.Room;
@@ -63,6 +64,7 @@ public class MessageController {
 	@RequestMapping("/showAllMessage")
 	public String showAllMessage(Message message,ModelMap modelMap,@RequestParam(required=true,defaultValue="1") Integer index,
             @RequestParam(required=false,defaultValue="15") Integer pageSize,HttpServletRequest request,HttpSession session) {
+		SimpleDateFormat sdf =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
 		
 		PageHelper.startPage(index, pageSize);
 		
@@ -74,6 +76,8 @@ public class MessageController {
 		
 		Page<Message> messageList = (Page<Message>) messageService.selectAllMessage(map);
 		for (Message mess : messageList) {
+			String[] startSplit=sdf.format(mess.getStartTime()).split(" ");
+			String[] endSplit=sdf.format(mess.getEndTime()).split(" ");
 			if(mess.getStartTime().getTime()>new Date().getTime()) {
 				mess.setMessageState(0);
 			}else if(mess.getStartTime().getTime()<new Date().getTime() && mess.getEndTime().getTime()>new Date().getTime()) {
@@ -81,6 +85,8 @@ public class MessageController {
 			}else if(mess.getEndTime().getTime()<new Date().getTime()) {
 				mess.setMessageState(2);
 			}
+			mess.setStartTimeString(startSplit[0]+"-"+endSplit[0]);
+			mess.setEndTimeString(startSplit[1]+"-"+endSplit[1]);
 		}
 		pageUtil.setPageInfo(messageList, index, pageSize,request);
 		
@@ -100,15 +106,59 @@ public class MessageController {
 	 */
 	@RequestMapping("/toUpdateMessage")
 	public String toUpdateMessage(Message message,ModelMap modelMap) {
+		//查询所有消息
 		Map<String,Object> map=new HashMap<>();
+		List<Message> messageList = messageService.selectAllMessage(map);
+		
 		if(message.getId()!=null) {
 			map.put("id", message.getId());
-			List<Message> messageList = messageService.selectAllMessage(map);
-			modelMap.put("message", messageList.get(0));
+			for (int i = 0; i < messageList.size(); i++) {
+				if(messageList.get(i).getId().equals(message.getId())) {
+					modelMap.put("message", messageList.get(i));
+					messageList.remove(i);
+				}
+			}
+			
 		}
 		List<Zone> zoneList = zoneService.selectAllZone(null);
-		modelMap.put("zoneList", zoneList);
 		
+		for (Message mess : messageList) {
+			//不考虑过期的消息
+			if(mess.getEndTime().getTime()<new Date().getTime()) {
+				continue;
+			}
+			//移除已经推送消息的房间
+			if (!mess.getId().equals(message.getId())) {
+				// 遍历校区、教学楼至教室
+				for (int j = 0;j < zoneList.size();j++) {
+					List<Building> buildingList = zoneList.get(j).getBuildingList();
+					for (int q = 0;q < buildingList.size();q++) {
+						List<Room> roomList = buildingList.get(q).getRoomList();
+						for (int i = 0; i < roomList.size(); i++) {
+							if (mess.getRoomId().contains(roomList.get(i).getId())) {
+								roomList.remove(i);
+								i--;
+							}
+						}
+						buildingList.get(q).setRoomList(roomList);
+						if(buildingList.get(q).getRoomList().size()==0) {
+							buildingList.remove(q);
+							q--;
+						}
+					}
+					zoneList.get(j).setBuildingList(buildingList);
+					if(zoneList.get(j).getBuildingList().size()==0) {
+						zoneList.remove(j);
+						j--;
+					}
+				}
+			}
+		}
+		/*modelMap.put("roomIdString", roomIdString);
+		modelMap.put("buildingIdString", buildingIdString);
+		modelMap.put("zoneIdString", zoneIdString);*/
+		
+		modelMap.put("zoneList", zoneList);
 		return "/message/edit-message";
 	}
 	
@@ -127,8 +177,12 @@ public class MessageController {
 			ModelMap modelMap) throws ParseException {
 		SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		//设置推送的开始和结束时间
-		if(startTimeString==null||endTimeString!=null) {
+		if(startTimeString==null||endTimeString==null) {
 			modelMap.put("error", "推送时间不能为空!");
+			return "/error/404";
+		}
+		if(sdf.parse(startTimeString).getTime()>=sdf.parse(endTimeString).getTime()) {
+			modelMap.put("error", "开始时间不得小于结束时间!");
 			return "/error/404";
 		}
 		message.setStartTime(sdf.parse(startTimeString));
@@ -171,6 +225,7 @@ public class MessageController {
 		
 		//设置推送消息的管理员id
 		message.setAdminId(((Admin)session.getAttribute("admin")).getId().toString());
+		
 		try {
 			if(message.getId()!=null) {
 				if(messageService.updateByPrimaryKeySelective(message)>0) {

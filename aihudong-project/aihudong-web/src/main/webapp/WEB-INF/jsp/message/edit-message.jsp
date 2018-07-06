@@ -85,15 +85,15 @@
                                 	<c:forEach items="${zoneList }" var="zone">
                                 		<div class="col-sm-5" style="border:1px solid blue;">
                                 		<input type="checkbox" id="zone${zone.id }" value="${zone.id }" name="zoneList[0].zoneName" onclick="checkZone(${zone.id},this)"
-                                		<c:if test="${fn:contains(message.zoneId,zone.id)}"> checked="checked" </c:if>>${zone.zoneName } 
+                                		<c:if test="${fn:contains(message.zoneId,zone.id)}"> checked="checked" </c:if>>${zone.zoneName } (校区)
                                 		<c:forEach items="${zone.buildingList }" var="building">
-                                			<div style="background:yellow; border-bottom:1px solid black;">
+                                			<div style="border-bottom:1px solid black;">
 	                                		<input type="checkbox" id="building${building.id }" value="${building.id }" name="buildingList[0].buildingName" class="zone${zone.id }" onclick="checkBuilding(${building.id},this,${zone.id})"
-	                                		<c:if test="${fn:contains(message.buildingId,building.id)}"> checked="checked" </c:if>> ${building.buildingName } 
+	                                		<c:if test="${fn:contains(message.buildingId,building.id)}"> checked="checked" </c:if>> ${building.buildingName } (教学楼)
                                 			<br/>
                                 			<c:forEach items="${building.roomList }" var="room">
                                 				<input type="checkbox" value="${room.id }" name="roomList[0].id" class="zone${zone.id } building${building.id}" onclick="checkRoom(${building.id},this,${zone.id})"
-	                                			<c:if test="${fn:contains(message.roomId,room.id)}"> checked="checked" </c:if>> ${room.num } 
+	                                			<c:if test="${fn:contains(message.roomId,room.id)}"> checked="checked" </c:if>> ${room.num } (房间)
                                 			</c:forEach>
                                 			</div>
                                 		</c:forEach>

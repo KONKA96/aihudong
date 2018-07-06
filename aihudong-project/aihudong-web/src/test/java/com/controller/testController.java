@@ -5,6 +5,9 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.shiro.crypto.hash.Md5Hash;
+import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -74,5 +77,16 @@ public class testController extends BaseTest{
 		QianduanController q=new QianduanController();
 		q.UserLogin("2",response,request);
 	}*/
+	
+	/**
+	 * 密码加密算法
+	 */
+	@Test
+	public void testMD5() {
+		String password = "123";
+		String username = "genji";
+		String md5 = new Md5Hash(password, username ,2).toString();
+		System.out.println("-----------------"+md5);
+	}
 	
 }
