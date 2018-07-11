@@ -2,6 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
 
@@ -48,7 +49,7 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">上传文件</label>
                                 <div class="col-sm-10">
-                                    <input type="file" class="form-control" name="file">
+									<input type="file" name="fileList" multiple="multiple" max="10" class="inputPic" accept="image/*">  
                                 </div>
                             </div>
                             
@@ -57,8 +58,8 @@
                                 <div class="col-sm-5">
                                     <div class="form-group">
 						                <label for="dtp_input1" class="col-md-2 control-label">start time</label>
-						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
-						                    <input class="form-control" name="startTime" size="16" type="text" value="" readonly>
+						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="yyyy-mm-dd hh:ii:ss" data-link-field="dtp_input1">
+						                    <input class="form-control" name="startTimeString" size="16" type="text" value="<fmt:formatDate value='${message.startTime }' pattern='yyyy-MM-dd HH:mm:ss'/>" readonly>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
 						                </div>
@@ -68,8 +69,8 @@
                                 <div class="col-sm-5">
                                     <div class="form-group">
 						                <label for="dtp_input1" class="col-md-2 control-label">end time</label>
-						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="dd MM yyyy - HH:ii p" data-link-field="dtp_input1">
-						                    <input class="form-control" name="endTime" size="16" type="text" value="" readonly>
+						                <div class="input-group date form_datetime col-md-5" data-date="2018-08-08T05:25:07Z" data-date-format="yyyy-mm-dd hh:ii:ss" data-link-field="dtp_input1">
+						                    <input class="form-control" name="endTimeString" size="16" type="text" value="<fmt:formatDate value='${message.endTime }' pattern='yyyy-MM-dd HH:mm:ss'/>" readonly>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
 						                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
 						                </div>
@@ -81,18 +82,18 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">接收终端</label>
                                 <div class="col-sm-10">
-                                	<c:forEach items="${zoneList }" var="zone" >
+                                	<c:forEach items="${zoneList }" var="zone">
                                 		<div class="col-sm-5" style="border:1px solid blue;">
-                                		<input type="checkbox" value="${zone.id }" name="zoneId" onclick="checkZone(${zone.id},this)"
-                                		<c:if test="${fn:contains(message.zoneId,zone.id)}"> checked="checked" </c:if>>${zone.zoneName } 
+                                		<input type="checkbox" id="zone${zone.id }" value="${zone.id }" name="zoneList[0].zoneName" onclick="checkZone(${zone.id},this)"
+                                		<c:if test="${fn:contains(message.zoneId,zone.id)}"> checked="checked" </c:if>>${zone.zoneName } (校区)
                                 		<c:forEach items="${zone.buildingList }" var="building">
-                                			<div style="background:yellow; border-bottom:1px solid black;">
-	                                		<input type="checkbox" value="${building.id }" name="buildingId" class="zone${zone.id }" onclick="checkBuilding(${building.id},this)"
-	                                		<c:if test="${fn:contains(message.buildingId,building.id)}"> checked="checked" </c:if>> ${building.buildingName } 
+                                			<div style="border-bottom:1px solid black;">
+	                                		<input type="checkbox" id="building${building.id }" value="${building.id }" name="buildingList[0].buildingName" class="zone${zone.id }" onclick="checkBuilding(${building.id},this,${zone.id})"
+	                                		<c:if test="${fn:contains(message.buildingId,building.id)}"> checked="checked" </c:if>> ${building.buildingName } (教学楼)
                                 			<br/>
                                 			<c:forEach items="${building.roomList }" var="room">
-                                				<input type="checkbox" value="${room.id }" name="roomId" class="zone${zone.id } building${building.id}"
-	                                			<c:if test="${fn:contains(message.roomId,room.id)}"> checked="checked" </c:if>> ${room.num } 
+                                				<input type="checkbox" value="${room.id }" name="roomList[0].id" class="zone${zone.id } building${building.id}" onclick="checkRoom(${building.id},this,${zone.id})"
+	                                			<c:if test="${fn:contains(message.roomId,room.id)}"> checked="checked" </c:if>> ${room.num } (房间)
                                 			</c:forEach>
                                 			</div>
                                 		</c:forEach>
@@ -118,24 +119,6 @@
 
 </body>
 <script type="text/javascript">
-	/* function selectAdmin(obj){
-		if(obj.value==1||obj.value==''){
-			$("#yijiSelect").empty();
-			$("#yijiadmin").css("display","none");
-		}else if(obj.value==2){
-			$("#yijiadmin").css("display","block");
-			$.ajax({
-				url:"/aihudong-web/admin/selectAllYiJiAdmin",
-				type:"post",
-				success:function(data){
-					$("#yijiSelect").append("<option value=''>---请选择---</option>");
-					for (var i = 0; i < data.length; i++) {
-						$("#yijiSelect").append("<option value='"+data[i].id+"'>"+data[i].truename+"</option>");
-					}
-				}
-			})
-		}
-	} */
 
 	$(document).ready(function () {
 	    $('.i-checks').iCheck({
@@ -144,34 +127,6 @@
 	    });
 	});
 	
-	function updateInfo(){
-		if($("#username")[0].value==""){
-			alert("用户名必填");
-			return false;
-		}else if($("#password")[0].value==""){
-			alert("密码必填");
-			return false;
-		}else if($("#truename")[0].value==""){
-			alert("姓名必填");
-			return false;
-		}
-		
-		$.ajax({
-			url:"/aihudong-web/admin/updateAdmin",
-			data:$("#editForm").serialize(),
-			type:"post",
-			success:function(data){
-				if(data=='success'){
-					alert("操作成功！");
-					window.location="/aihudong-web/admin/showAllAdmin";
-				}else if(data=='exist'){
-					alert("用户名不能重复！");
-				}else{
-					alert("操作失败");
-				}
-			}
-		})
-	}
 	
 	function goback(){
 		window.history.back();
@@ -193,19 +148,81 @@
 		
 	}
 	
-	function checkBuilding(id,obj){
+	function checkBuilding(id,obj,zId){
+		//下级全选和清空
 		var buildingId="building"+id;
 		var ele=document.getElementsByClassName(buildingId);
+		
+		//校区的选中和清空
+		var zoneId="zone"+zId;
+		var childNodes=document.getElementsByClassName(zoneId);
+		
+		var zone=document.getElementById(zoneId);
 		if(obj.checked==true){
 			for (var i = 0; i < ele.length; i++) {
 				ele[i].checked=true;
 			}
+			zone.checked=true;
+			
 		}else{
 			for (var i = 0; i < ele.length; i++) {
 				ele[i].checked=false;
 			}
+			var count=0;
+			for (var i = 0; i < childNodes.length; i++) {
+				if(childNodes[i].checked==true){
+					break;
+				}else{
+					count++;
+				}
+			}
+			if(count==childNodes.length){
+				zone.checked=false;
+			}
 		}
 		
+	}
+	
+	function checkRoom(bid,obj,zId){
+		//下级全选和清空
+		var buildingId="building"+bid;
+		var ele=document.getElementsByClassName(buildingId);
+		
+		//校区的选中和清空
+		var zoneId="zone"+zId;
+		var childNodes=document.getElementsByClassName(zoneId);
+		
+		var zone=document.getElementById(zoneId);
+		var building=document.getElementById(buildingId);
+		
+		if(obj.checked==true){
+			zone.checked=true;
+			building.checked=true;
+		}else{
+			counti=0;
+			for (var i = 0; i < ele.length; i++) {
+				if(ele[i].checked==true){
+					break;
+				}else{
+					counti++;
+				}
+			}
+			if(counti==ele.length){
+				building.checked=false;
+			}
+			
+			countj=0;
+			for (var i = 0; i < childNodes.length; i++) {
+				if(childNodes[i].checked==true){
+					break;
+				}else{
+					countj++;
+				}
+			}
+			if(countj==childNodes.length){
+				zone.checked=false;
+			}
+		}
 	}
 	
 	//日历插件

@@ -1,6 +1,10 @@
 package com.model;
 
 import java.util.Date;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 public class Message {
     private Integer id;
@@ -16,18 +20,78 @@ public class Message {
     private String adminId;
 
     private Date startTime;
+    
+    private String startTimeString;
 
     private Date endTime;
+    
+    private String endTimeString;
 
     private Integer messageState;
 
     private String zoneId;
+    
+    private List<Zone> zoneList;
 
     private String buildingId;
+    
+    private List<Building> buildingList;
 
     private String roomId;
     
+    private List<Room> roomList;
+    
     private Admin admin;
+    
+    private List<MultipartFile> fileList; 
+    
+    public String getStartTimeString() {
+		return startTimeString;
+	}
+
+	public void setStartTimeString(String startTimeString) {
+		this.startTimeString = startTimeString;
+	}
+
+	public String getEndTimeString() {
+		return endTimeString;
+	}
+
+	public void setEndTimeString(String endTimeString) {
+		this.endTimeString = endTimeString;
+	}
+
+	public List<MultipartFile> getFileList() {
+		return fileList;
+	}
+
+	public void setFileList(List<MultipartFile> fileList) {
+		this.fileList = fileList;
+	}
+
+	public List<Zone> getZoneList() {
+		return zoneList;
+	}
+
+	public void setZoneList(List<Zone> zoneList) {
+		this.zoneList = zoneList;
+	}
+
+	public List<Building> getBuildingList() {
+		return buildingList;
+	}
+
+	public void setBuildingList(List<Building> buildingList) {
+		this.buildingList = buildingList;
+	}
+
+	public List<Room> getRoomList() {
+		return roomList;
+	}
+
+	public void setRoomList(List<Room> roomList) {
+		this.roomList = roomList;
+	}
 
     public Admin getAdmin() {
 		return admin;
@@ -138,7 +202,8 @@ public class Message {
 		return "Message [id=" + id + ", messageName=" + messageName + ", messageType=" + messageType
 				+ ", messageContent=" + messageContent + ", messagePic=" + messagePic + ", adminId=" + adminId
 				+ ", startTime=" + startTime + ", endTime=" + endTime + ", messageState=" + messageState + ", zoneId="
-				+ zoneId + ", buildingId=" + buildingId + ", roomId=" + roomId + ", admin=" + admin + "]";
+				+ zoneId + ", zoneList=" + zoneList + ", buildingId=" + buildingId + ", buildingList=" + buildingList
+				+ ", roomId=" + roomId + ", roomList=" + roomList + ", admin=" + admin + "]";
 	}
-    
+
 }

@@ -101,7 +101,7 @@
 	  		and b.id=#{id}
 	  	</if>
 	  	<if test="buildingName!='' and buildingName!=null">
-	  		and b.building_name =#{buildingName}
+	  		and b.building_name = #{buildingName}
 	  	</if>
   	</where>
   </select>
