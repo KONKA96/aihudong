@@ -14,7 +14,7 @@ public class testShiroLogin extends BaseTest{
 	@Test
 	public void testLogin() {
 		Admin admin=new Admin();
-		admin.setUsername("genji");
+		admin.setUsername("yiji");
 		admin.setPassword("123");
 		UsernamePasswordToken token = new UsernamePasswordToken(admin.getUsername(),
 				admin.getPassword());
