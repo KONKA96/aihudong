@@ -83,8 +83,8 @@ public class testController extends BaseTest{
 	 */
 	@Test
 	public void testMD5() {
-		String password = "123";
-		String username = "genji";
+		String password = "kj966111";
+		String username = "konka2";
 		String md5 = new Md5Hash(password, username ,2).toString();
 		System.out.println("-----------------"+md5);
 	}

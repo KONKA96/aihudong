@@ -11,6 +11,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.crypto.hash.Md5Hash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -174,6 +176,10 @@ public class AdminController {
     	return "/adminuser/edit-admin";
     }
     
+    /**
+     * 查询所有一级管理员
+     * @return
+     */
     @ResponseBody
     @RequestMapping(value="/selectAllYiJiAdmin",produces = "text/json;charset=UTF-8")
     public String selectAllYiJiAdmin(){
@@ -181,6 +187,7 @@ public class AdminController {
     	
     	return JsonUtils.objectToJson(YijiAdminList);
     }
+    
     /**
      * 修改、新增管理员
      * @param admin
@@ -233,6 +240,27 @@ public class AdminController {
 		}
     	return "error";
     }
+    
+    /**
+     * 检测与原密码是否匹配
+     * @param password
+     * @param session
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/testOldPwd")
+    public String testOldPwd(String password) {
+    	org.apache.shiro.subject.Subject subject = SecurityUtils.getSubject();
+    	Admin admin=new Admin();
+    	admin.setUsername((String)subject.getPrincipal());
+    	admin=adminService.adminLogin(admin);
+    	String md5Pwd=new Md5Hash(password,admin.getUsername(),2).toString();
+    	if(md5Pwd.equals(admin.getPassword())) {
+    		return "success";
+    	}
+    	return "";
+    }
+    
     /**
      * 删除管理员信息
      * @param admin

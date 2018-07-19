@@ -60,6 +60,8 @@ public class test {
 		try {
 			subject.login(token);
 			admin = adminService.adminLogin(admin);
+			
+			logger.info(admin.getUsername()+"登录系统");
 			session.setAttribute("admin", admin);
 			return "success";
 		} catch (AuthenticationException e) {
