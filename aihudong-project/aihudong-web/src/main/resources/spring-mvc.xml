@@ -30,6 +30,17 @@
 	
 		<mvc:default-servlet-handler/>
 		
+		<!-- 整合Freemarker -->
+	    <!-- 放在InternalResourceViewResolver的前面，优先找freemarker -->  
+	    <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">  
+	        <property name="templateLoaderPath" value="/WEB-INF/views/templates"/>  
+	    </bean>  
+	    <bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">  
+	        <property name="prefix" value=""/>  
+	        <property name="suffix" value=".ftl"/>  
+	        <property name="contentType" value="text/html; charset=UTF-8"/>
+	    </bean>
+		
 		<!--3.视图解析器  需要修改 前缀和后缀 -->
 		<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 			<property name="prefix" value="/WEB-INF/jsp/"/>	

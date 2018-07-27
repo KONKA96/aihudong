@@ -8,7 +8,7 @@
 			+ path + "/";
 %>
 <link rel="shortcut icon" href="favicon.ico"> 
-<%-- <link href="<%=basePath %>resources/css/laydate.css?v=5.0.9" rel="stylesheet"> --%>
+<%-- <link href="<%=basePath %>resources/css/laydate.css?v=1.0.0" rel="stylesheet"> --%>
 <link href="<%=basePath %>resources/css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
 <link href="<%=basePath %>resources/css/font-awesome.css?v=4.4.0" rel="stylesheet">
 <link href="<%=basePath %>resources/css/animate.css" rel="stylesheet">

@@ -1,6 +1,7 @@
 package com.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +17,7 @@ import com.model.Admin;
 import com.model.Logger;
 import com.model.Teacher;
 import com.service.AdminService;
+import com.service.impl.AdminServiceImpl;
 
 public class testController extends BaseTest{
 	
@@ -83,10 +85,24 @@ public class testController extends BaseTest{
 	 */
 	@Test
 	public void testMD5() {
-		String password = "kj966111";
-		String username = "konka2";
-		String md5 = new Md5Hash(password, username ,2).toString();
-		System.out.println("-----------------"+md5);
+		String password = "123";
+		String[] username = {"1","1234","3","username","1234123123","2132321","31232","555666","zyl"};
+		for (int i = 0; i < username.length; i++) {
+			String md5 = new Md5Hash(password, username[i] ,2).toString();
+			System.out.println(username[i]+"-----------------"+md5);
+		}
+		
+		
+	}
+	
+	@Test
+	public void updateUserPwd() {
+		AdminService adminService=new AdminServiceImpl();
+		List<Admin> selectAllAdmin = adminService.selectAllAdmin(new Admin());
+		for (Admin admin : selectAllAdmin) {
+			admin.setPassword(new Md5Hash(admin.getPassword(), admin.getUsername() ,2).toString());
+			adminService.updateByPrimaryKeySelective(admin);
+		}
 	}
 	
 }
